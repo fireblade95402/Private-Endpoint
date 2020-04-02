@@ -10,7 +10,7 @@ One of the quick wins to get this working is to deploy a custom DNS server in th
 Below I'll be going through a high level walkthrough to create this solution in Azure and proving the private connection between App service and Azure SQL database.
 
 Here's a rough architecture diagram showing a design  
-![Architecture](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image14.JPG "Private endpoint Architecture") 
+![Architecture](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image13.JPG "Private endpoint Architecture") 
 
 ## Prerequisites
 
@@ -27,32 +27,32 @@ Here's a rough architecture diagram showing a design
 This will create a private endpoint for the Azure SQL Server that was created above.  
 
 * Go to the Azure SQL Server / "Private endpoint connections"  
-![Azure SQL Server](img\image1.jpg "Azure SQL Server - Private endpoint connections")  
+![Azure SQL Server](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image1.jpg "Azure SQL Server - Private endpoint connections")  
 
 * Click on "+ Private endpoint" to create a new endpoint  
     * Basics
         * Name for the new private endpoint connection  
         * Region to create it in.  
-        ![Azure SQL Server](img\image2.jpg "Azure SQL Server - Private endpoint connections - Basics")  
+        ![Azure SQL Server](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image2.jpg "Azure SQL Server - Private endpoint connections - Basics")  
 
     * Resource
         * Select the resource type "Microsoft.Sql/servers.  
         * Select Sql server created above.  
-        ![Azure SQL Server](img\image3.jpg "Azure SQL Server - Private endpoint connections - Resource")  
+        ![Azure SQL Server](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image3.jpg "Azure SQL Server - Private endpoint connections - Resource")  
 
     * Confirguration
         * Select a VNET created above  
         * Select subnet where the Private Endpoint will be created in.  
         * If for your first Private Endpoint. You'll need to select Yes for Integrate with Private DNS zone  
-        ![Azure SQL Server](img\image4.jpg "Azure SQL Server - Private endpoint connections - Configuration")  
+        ![Azure SQL Server](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image4.jpg "Azure SQL Server - Private endpoint connections - Configuration")  
 
     * You can added Tags is required.  
     * Click "Review + Create" to create the Private Endpoint.  
     * Once this has been completed you will be able to see that a new private endpoint and if selected a new Private DNS zone in your resource group:  
-    ![Azure SQL Server](img\image5.jpg "Azure SQL Server - Private endpoint and Private DNS zone")  
+    ![Azure SQL Server](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image5.jpg "Azure SQL Server - Private endpoint and Private DNS zone")  
     (*Private endpoint name above incorrect in image*)  
     * Goto the Private DNS zone resource and link the VNET's created in the prerequisites (one might already to linked):  
-    ![Private DNS Zone](img\image14.jpg "Private DNS zone - VNET's")  
+    ![Private DNS Zone](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image14.jpg "Private DNS zone - VNET's")  
 
 ## Step 2 - Integrate App Service into VNET
 
@@ -60,9 +60,9 @@ This will integration the App Service into the one of the VNET's created above. 
 
 * Go to the Azure App Service  / Networking  
 * Click to configure VNET Integration to integrate to a VNET created above.  
-![App Serivce](img\image6.jpg "Configure VNET ")  
+![App Serivce]https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image6.jpg "Configure VNET ")  
 * Configure the integration by selecting a VNET and subnet to integrate with.  
-![App Service](img\image7.jpg "Integrate with VNET")  
+![App Service](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image7.jpg "Integrate with VNET")  
 
 
 
@@ -76,18 +76,18 @@ I'm keeping this high level.
 - Enable the DNS role on the Server.  
 - Configure the forwarder to goto 168.63.129.16 ([Name resolution for Azure resources](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances)).  
 - Change the app service VNET to use the custom DNS Service IS Address  
-![App Service - VNET](img\image9.jpg "Set custom DNS Server on app service VNET")  
+![App Service - VNET](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image9.jpg "Set custom DNS Server on app service VNET")  
 
 ## Notes
 
 * The Azure SQL server URL for the private endpoint is found in the private endpoint resource.  
-![Private Endpoint](img\image8.jpg "Private Endpoint URL")  
+![Private Endpoint](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image8.jpg "Private Endpoint URL")  
 * Remember to check that you're using the Azure SQL Server URL above in the app serivce connection string.  
-![App Service](img\image10.jpg "App Service Connection String")  
+![App Service]https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image10.jpg "App Service Connection String")  
 * You can also check transactions created in the Azure SQL Database by first turning on auditing and then checking transactions generated by the App Serivce. Which would come from the App Serivce and allocated by the VNET it's integrated with.  
-![Azure SQL Database](img\image11.jpg "Audit check of client IP")  
+![Azure SQL Database](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image11.jpg "Audit check of client IP")  
 * You can also see that in the "Firewalls and virtual networks" section in the Azure SQL Server. That there's no public access, firewall rules for access or any integrations to VNETs. All access would be via the Private Endpoint.  
-![Azure SQL Server](img\image12.jpg "Firewalls and virtual networks")  
+![Azure SQL Server](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image12.jpg "Firewalls and virtual networks")  
 
 ## Links
 
