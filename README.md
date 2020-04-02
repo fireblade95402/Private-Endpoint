@@ -10,7 +10,7 @@ One of the quick wins to get this working is to deploy a custom DNS server in th
 Below I'll be going through a high level walkthrough to create this solution in Azure and proving the private connection between App service and Azure SQL database.
 
 Here's a rough architecture diagram showing a design  
-![Architecture](img\image13.jpg "Private endpoint Architecture") 
+![Architecture](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image14.JPG "Private endpoint Architecture") 
 
 ## Prerequisites
 
