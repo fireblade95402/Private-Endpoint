@@ -27,7 +27,7 @@ Here's a rough architecture diagram showing a design
 This will create a private endpoint for the Azure SQL Server that was created above.  
 
 * Go to the Azure SQL Server / "Private endpoint connections"  
-![Azure SQL Server](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image1.jpg "Azure SQL Server - Private endpoint connections")  
+![Azure SQL Server](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image1.JPG "Azure SQL Server - Private endpoint connections")  
 
 * Click on "+ Private endpoint" to create a new endpoint  
     * Basics
