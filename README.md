@@ -60,7 +60,7 @@ This will integration the App Service into the one of the VNET's created above. 
 
 * Go to the Azure App Service  / Networking  
 * Click to configure VNET Integration to integrate to a VNET created above.  
-![App Serivce]https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image6.JPG "Configure VNET ")  
+![App Serivce](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image6.JPG "Configure VNET ")  
 * Configure the integration by selecting a VNET and subnet to integrate with.  
 ![App Service](https://github.com/fireblade95402/Private-Endpoint/blob/master/img/image7.JPG "Integrate with VNET")  
 
