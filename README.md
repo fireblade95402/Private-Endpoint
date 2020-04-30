@@ -1,3 +1,11 @@
+# UPDATE - App Service vnet integration now works with private dsn zones 
+Custom DNS not required. All you need to do is add the following into web.config:
+* WEBSITE_DNS_SERVER with value 168.63.129.16
+* WEBSITE_VNET_ROUTE_ALL with value 1
+Link to documentation : https://docs.microsoft.com/en-us/azure/app-service/web-sites-integrate-with-vnet
+
+I'll update the below to reflect this soon!
+   
 # Private Endpoint conenction to Azure SQL Server from an App Service
 
 This shows a way of connecting to an Azure SQL database from an app Serivce using a Private Endpoint.
