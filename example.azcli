@@ -28,6 +28,7 @@ sqlserverid=$(az sql server show --name "$sqlserver" --resource-group $rg --quer
 #Create App Service (Linux)
 az appservice plan create --name $appplan --resource-group $rg --sku S1 #free can't do vnet integration
 az webapp create --resource-group $rg --plan $appplan --name $appservice 
+webserviceurl=$(az webapp show --name $appservice --resource-group "$rg" --query 'hostNames' -o tsv)
 
 #I'm deployed the app from Virtual Studio (My custom app). 
 
@@ -36,12 +37,12 @@ az webapp config appsettings set --name $appservice --resource-group $rg --setti
 az webapp config appsettings set --name $appservice --resource-group $rg --settings WEBSITE_VNET_ROUTE_ALL="1"
 az webapp config appsettings set --name $appservice --resource-group $rg --settings ASPNETCORE_ENVIRONMENT="Production"
 az webapp config appsettings set --name $appservice --resource-group $rg --settings "location=$location"
-az webapp config appsettings set --name $appservice --resource-group $rg --settings AllowedHosts="todo-mwg-web-app.azurewebsites.net"
+az webapp config appsettings set --name $appservice --resource-group $rg --settings AllowedHosts="$webserviceurl"
 az webapp config connection-string set --resource-group $rg --name $appservice --settings "MyDbConnection=$connectionstring" --connection-string-type SQLServer
 
 #You can test the app now - Should work without private endpoints
 #Use commnad below to get URL
-az webapp show --name $appservice --resource-group "$rg" --query 'hostNames' -o tsv
+echo $webserviceurl
 
 # or
 # az webapp browse --name $appservice --resource-group "$rg" to launch site in browser
@@ -79,4 +80,4 @@ az sql server firewall-rule create --resource-group $rg --server $sqlserver --na
 
 #You can test the app now - Should work with private endpoints
 #Use commnad below to get URL
-az webapp show --name $appservice --resource-group "$rg" --query 'hostNames' -o tsv
+echo $webserviceurl
