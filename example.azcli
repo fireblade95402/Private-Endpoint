@@ -1,0 +1,82 @@
+#Parameters
+rg="<Resource Group Name>"
+sqlserver="<SQL Server Name>"
+location="<Region>"
+adminuser="<SQL Admin Name>"
+adminpwd="<SQL Admin Pwd>"
+appplan="<App Plan Name>"
+appservice="<Web App Name>"
+vnetsql="<SQL VNet Name>"
+subnetsql="<SQL VNet Subnet Name>"
+vnetapp="<APP VNet Name>"
+subnetapp="<APP VNet Subnet Name>"
+
+#Variables
+connectionstring="Server=tcp:$sqlserver.database.windows.net,1433;Initial Catalog=coreDB;Persist Security Info=False;User ID=$adminuser;Password=$adminpwd;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+zonename="privatelink.database.windows.net"
+
+#Create Resource Group
+az group create --name $rg --location "$location"
+
+#Create SQL Server plus DB and access rule
+az sql server create --name $sqlserver --resource-group $rg --location "$location" --admin-user $adminuser --admin-password $adminpwd
+az sql server firewall-rule create --resource-group $rg --server $sqlserver --name AllowAllIps --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+az sql db create --resource-group $rg --server $sqlserver --name coreDB --service-objective S0
+
+sqlserverid=$(az sql server show --name "$sqlserver" --resource-group $rg --query 'id' -o tsv) #Used for private endpoint creation
+
+#Create App Service (Linux)
+az appservice plan create --name $appplan --resource-group $rg --sku S1 #free can't do vnet integration
+az webapp create --resource-group $rg --plan $appplan --name $appservice 
+
+#I'm deployed the app from Virtual Studio (My custom app). 
+
+#Setup appsettings
+az webapp config appsettings set --name $appservice --resource-group $rg --settings WEBSITE_DNS_SERVER="168.63.129.16"
+az webapp config appsettings set --name $appservice --resource-group $rg --settings WEBSITE_VNET_ROUTE_ALL="1"
+az webapp config appsettings set --name $appservice --resource-group $rg --settings ASPNETCORE_ENVIRONMENT="Production"
+az webapp config appsettings set --name $appservice --resource-group $rg --settings "location=$location"
+az webapp config appsettings set --name $appservice --resource-group $rg --settings AllowedHosts="todo-mwg-web-app.azurewebsites.net"
+az webapp config connection-string set --resource-group $rg --name $appservice --settings "MyDbConnection=$connectionstring" --connection-string-type SQLServer
+
+#You can test the app now - Should work without private endpoints
+#Use commnad below to get URL
+az webapp show --name $appservice --resource-group "$rg" --query 'hostNames' -o tsv
+
+# or
+# az webapp browse --name $appservice --resource-group "$rg" to launch site in browser
+#Create vnet's and subnets
+az network vnet create --name $vnetsql --resource-group $rg --subnet-name "$subnetsql" --address-prefix 10.1.0.0/16 --subnet-prefix 10.1.1.0/24
+az network vnet create --name $vnetapp --resource-group $rg --subnet-name "$subnetapp" --address-prefix 10.2.0.0/16 --subnet-prefix 10.2.1.0/24
+
+#Create VNET Peering
+az network vnet peering create --name apptosql --resource-group "$rg" --remote-vnet "$vnetsql" --vnet-name "$vnetapp" --allow-vnet-access
+az network vnet peering create --name sqltoapp --resource-group "$rg" --remote-vnet "$vnetapp" --vnet-name "$vnetsql" --allow-vnet-access
+
+#Private Endpoint
+az network vnet subnet update --name "$subnetsql" --resource-group $rg --vnet-name $vnetsql --disable-private-endpoint-network-policies true
+az network private-endpoint create --name "$sqlserver-private-endpoint" --resource-group $rg --vnet-name $vnetsql --subnet "$subnetsql" --private-connection-resource-id "$sqlserverid" --group-ids sqlServer --connection-name "$sqlserver-private-endpoint"
+
+#Private DNS Zone
+az network private-dns zone create --resource-group $rg --name  "$zonename"
+az network private-dns link vnet create --resource-group $rg --zone-name  "$zonename" --name "$vnetsql" --virtual-network $vnetsql --registration-enabled false 
+az network private-dns link vnet create --resource-group $rg --zone-name  "$zonename" --name "$vnetapp" --virtual-network $vnetapp --registration-enabled false 
+
+#Query get private IP Address for private dns record  
+networkInterfaceId=$(az network private-endpoint show --name "$sqlserver-private-endpoint" --resource-group $rg --query 'networkInterfaces[0].id' -o tsv)
+privateIPAddress=$(az resource show --ids $networkInterfaceId --api-version 2019-04-01 --query 'properties.ipConfigurations[].properties[].privateIPAddress' -o tsv)
+ 
+#Create DNS records 
+az network private-dns record-set a create --name $sqlserver --zone-name privatelink.database.windows.net --resource-group $rg  
+az network private-dns record-set a add-record --record-set-name $sqlserver --zone-name privatelink.database.windows.net --resource-group $rg -a $privateIPAddress 
+
+#vnet integration with app 
+az webapp vnet-integration add -g $rg -n $appservice --vnet $vnetapp --subnet $subnetapp 
+
+#Turn off public and Azure  access to the SQL Server
+az sql server update -n $sqlserver -g $rg --set publicNetworkAccess="Disabled"
+az sql server firewall-rule create --resource-group $rg --server $sqlserver --name  DisableAllAzureServices --start-ip-address 255.255.255.255 --end-ip-address 255.255.255.255
+
+#You can test the app now - Should work with private endpoints
+#Use commnad below to get URL
+az webapp show --name $appservice --resource-group "$rg" --query 'hostNames' -o tsv
