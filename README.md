@@ -1,8 +1,11 @@
 # UPDATE - App Service vnet integration now works with private dsn zones 
-Custom DNS not required. All you need to do is add the following into web.config:
-* WEBSITE_DNS_SERVER with value 168.63.129.16
-* WEBSITE_VNET_ROUTE_ALL with value 1
-Link to documentation : https://docs.microsoft.com/en-us/azure/app-service/web-sites-integrate-with-vnet
+Custom DNS not required. 
+
+* All you need to do is add the following into web.config:
+   * WEBSITE_DNS_SERVER with value 168.63.129.16
+   * WEBSITE_VNET_ROUTE_ALL with value 1
+* Documentation [link](https://docs.microsoft.com/en-us/azure/app-service/web-sites-integrate-with-vnet)
+* [Example Deployment (Azure CLI)](https://github.com/fireblade95402/Private-Endpoint/blob/master/example.azcli "Example Deployment (Azure CLI)") 
 
 I'll update the below to reflect this soon!
    
